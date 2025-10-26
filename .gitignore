@@ -30,6 +30,9 @@ yarn-error.log*
 .env*.local
 .env.production
 
+# Render environment (contains secrets - DO NOT COMMIT)
+render-env.txt
+
 # Vercel
 .vercel
 
