@@ -11,6 +11,7 @@ import { z } from 'zod';
 const envSchema = z.object({
     // Database
     DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+    DIRECT_URL: z.string().optional(), // For Neon migrations
 
     // NextAuth
     NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
@@ -39,7 +40,7 @@ const envSchema = z.object({
 
 // Public environment variables (available to browser)
 const publicEnvSchema = z.object({
-    NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     NEXT_PUBLIC_APP_NAME: z.string().default('Taadiway CRM'),
     NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: z.string().optional(),
     NEXT_PUBLIC_PAYPAL_CLIENT_ID: z.string().optional(),
@@ -63,6 +64,7 @@ function validateEnv() {
     try {
         const parsed = envSchema.parse({
             DATABASE_URL: process.env.DATABASE_URL,
+            DIRECT_URL: process.env.DIRECT_URL,
             NEXTAUTH_URL: process.env.NEXTAUTH_URL,
             NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
             NODE_ENV: process.env.NODE_ENV,

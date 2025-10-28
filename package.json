@@ -19,7 +19,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "postinstall": "prisma generate",
     "production:build": "prisma generate && prisma migrate deploy && next build",
-    "production:start": "next start -p ${PORT:-3000}"
+    "production:start": "next start -p ${PORT:-3000}",
+    "render:build": "npm install --legacy-peer-deps && prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.3",

@@ -8,6 +8,24 @@ import { useState } from "react";
 import superjson from "superjson";
 import { PreferencesProvider } from "@/lib/preferences-context";
 
+function getBaseUrl() {
+  if (typeof window !== "undefined") {
+    // Browser: use relative URL
+    return "";
+  }
+  // Server: use environment variable or localhost
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return process.env.RENDER_EXTERNAL_URL;
+  }
+  return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
@@ -36,7 +54,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       transformer: superjson,
       links: [
         httpBatchLink({
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/api/trpc`,
+          url: getBaseUrl() + "/api/trpc",
           // Enable batching for better performance
           maxURLLength: 2083,
           // Add headers for caching
