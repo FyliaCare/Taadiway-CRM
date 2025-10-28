@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  poweredByHeader: false,
 
   // Performance optimizations
   compiler: {
@@ -12,10 +13,26 @@ const nextConfig = {
 
   // Image optimization
   images: {
-    domains: ['localhost', 'avatars.githubusercontent.com', 'lh3.googleusercontent.com'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Production optimizations
@@ -25,35 +42,86 @@ const nextConfig = {
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Production optimizations
     if (!dev && !isServer) {
       config.optimization = {
         ...config.optimization,
+        moduleIds: 'deterministic',
+        runtimeChunk: 'single',
         splitChunks: {
           chunks: 'all',
           cacheGroups: {
             default: false,
             vendors: false,
+            // Framework chunk (React, Next.js)
+            framework: {
+              name: 'framework',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
             // Vendor chunk
             vendor: {
               name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20
+              test: /[\\/]node_modules[\\/]/,
+              priority: 20,
+              enforce: true,
+            },
+            // UI libraries chunk
+            ui: {
+              name: 'ui',
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+              priority: 30,
+              enforce: true,
             },
             // Common chunk
             common: {
               name: 'common',
               minChunks: 2,
-              chunks: 'all',
               priority: 10,
               reuseExistingChunk: true,
-              enforce: true
-            }
-          }
-        }
+              enforce: true,
+            },
+          },
+        },
       };
     }
+
+    // Optimize module resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve(__dirname, 'src'),
+    };
+
     return config;
+  },
+
+  // Headers for performance and security
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 }
 

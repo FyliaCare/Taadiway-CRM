@@ -12,14 +12,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
-        cacheTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
+        cacheTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
-        retry: 1,
+        retry: 2,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        // Enable query deduplication
+        networkMode: 'online',
+        // Prefetch on hover for better UX
+        refetchOnMount: false,
       },
       mutations: {
-        retry: 1,
+        retry: 2,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        networkMode: 'online',
       },
     },
   }));
@@ -30,6 +37,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${process.env.NEXT_PUBLIC_APP_URL}/api/trpc`,
+          // Enable batching for better performance
+          maxURLLength: 2083,
+          // Add headers for caching
+          headers() {
+            return {
+              'x-trpc-source': 'react',
+            };
+          },
         }),
       ],
     })
