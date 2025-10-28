@@ -26,7 +26,7 @@ Write-Host "Step 2: Resolving failed migration..." -ForegroundColor Green
 Write-Host "If migration '20251024185709_taadiway_crm' is in failed state:" -ForegroundColor Yellow
 
 # Try to resolve the failed migration
-$result = npx prisma migrate resolve --rolled-back "20251024185709_taadiway_crm" 2>&1
+$null = npx prisma migrate resolve --rolled-back "20251024185709_taadiway_crm" 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Migration not in failed state or already resolved" -ForegroundColor Yellow
 }

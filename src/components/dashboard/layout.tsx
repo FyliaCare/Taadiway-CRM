@@ -25,6 +25,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/dashboard/NotificationBell";
+import { MobileBottomNav, MobileHeader } from "@/components/mobile/MobileNav";
+import { PWAInstallPrompt } from "@/components/mobile/PWAInstallPrompt";
 
 // Admin navigation
 const adminNavigation = [
@@ -69,7 +71,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   // Determine if user is admin or client
   const isAdmin = session?.user?.role === "SUPER_ADMIN" || session?.user?.role === "ADMIN";
   const isSuperAdmin = session?.user?.role === "SUPER_ADMIN";
-  
+
   // Use navigation with Users menu if super admin or admin
   let navigation = clientNavigation;
   if (isAdmin) {
@@ -80,18 +82,18 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <div className="flex w-64 flex-col border-r bg-card">
+      {/* Desktop Sidebar - Hidden on mobile */}
+      <div className="hidden md:flex w-64 flex-col border-r bg-card">
         <div className="flex h-16 items-center border-b px-6">
           <h1 className="text-xl font-bold">Taadiway CRM</h1>
         </div>
-        
+
         <nav className="flex-1 space-y-1 p-4">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             const hasBadge = 'badge' in item && item.badge;
-            
+
             return (
               <Link
                 key={item.name}
@@ -115,7 +117,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* User Section */}
+        {/* User Section - Desktop */}
         <div className="border-t p-4">
           <div className="mb-2 flex items-center gap-3 rounded-md px-3 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -128,16 +130,16 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               </p>
             </div>
           </div>
-          
+
           <Link href="/dashboard/settings">
-            <Button variant="ost" className="w-full justify-start" size="sm">
+            <Button variant="outline" className="w-full justify-start" size="sm">
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </Button>
           </Link>
-          
+
           <Button
-            variant="ost"
+            variant="outline"
             className="w-full justify-start text-destructive hover:text-destructive"
             size="sm"
             onClick={() => signOut({ callbackUrl: "/auth/signin", redirect: true })}
@@ -150,8 +152,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header with Notifications */}
-        <div className="flex items-center justify-between h-16 border-b bg-card px-6">
+        {/* Desktop Header - Hidden on mobile */}
+        <div className="hidden md:flex items-center justify-between h-16 border-b bg-card px-6">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold text-gray-900">
               {navigation.find((item) => pathname === item.href)?.name || "Dashboard"}
@@ -170,8 +172,18 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
-        
-        <div className="flex-1 overflow-y-auto p-8">{children}</div>
+
+        {/* Mobile Header */}
+        <MobileHeader title={navigation.find((item) => pathname === item.href)?.name || "Dashboard"} />
+
+        {/* Main Content with mobile padding */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">{children}</div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav />
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
       </div>
     </div>
   );
