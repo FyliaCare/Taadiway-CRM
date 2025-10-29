@@ -193,11 +193,7 @@ const nextConfig = {
   // Production optimizations
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    serverComponentsExternalPackages: ['@react-pdf/renderer'],
   },
-
-  // Transpile packages that need it
-  transpilePackages: ['@react-pdf/renderer'],
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
